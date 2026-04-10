@@ -14,7 +14,7 @@ import qualified Control.Exception as E
 import Foreign.Marshal.Alloc (mallocBytes, free)
 import System.Timeout
 
-#if !defined(mingw32_HOST_OS)
+#if !defined(mingw32_HOST_OS) && !defined(ghcjs_HOST_OS)
 import Control.Concurrent.STM
 import qualified GHC.Event as Ev
 #endif
@@ -70,7 +70,7 @@ gracefulClose s tmout0 = sendRecvFIN `E.finally` close s
               E.bracket (mallocBytes bufSize) free (recvEOF s tmout0)
 
 recvEOF :: Socket -> Int -> Ptr Word8 -> IO ()
-#if !defined(mingw32_HOST_OS)
+#if !defined(mingw32_HOST_OS) && !defined(ghcjs_HOST_OS)
 recvEOF s tmout0 buf = do
     mevmgr <- Ev.getSystemEventManager
     case mevmgr of
@@ -88,7 +88,7 @@ bufSize = 1024
 recvEOFtimeout :: Socket -> Int -> Ptr Word8 -> IO ()
 recvEOFtimeout s tmout0 buf = void $ timeout tmout0 $ recvBuf s buf bufSize
 
-#if !defined(mingw32_HOST_OS)
+#if !defined(mingw32_HOST_OS) && !defined(ghcjs_HOST_OS)
 data Wait = MoreData | TimeoutTripped
 
 recvEOFevent :: Socket -> Int -> Ptr Word8 -> IO ()
